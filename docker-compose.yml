@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  web:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - api
+
+  api:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=postgresql://devshare_user:devshare_pass@db:5432/devshare_db
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=your_super_secret_key_here
+      - MAIL_USERNAME=your_mail_username
+      - MAIL_PASSWORD=your_mail_password
+      - MAIL_FROM=noreply@yourdomain.com
+      - MAIL_PORT=587
+      - MAIL_SERVER=smtp.gmail.com
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: devshare_db
+      POSTGRES_USER: devshare_user
+      POSTGRES_PASSWORD: devshare_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
