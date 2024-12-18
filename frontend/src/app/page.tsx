@@ -2,9 +2,18 @@
 
 import { Box, Container, Heading, Text, VStack, SimpleGrid, Icon, AspectRatio, Button, Stack } from '@chakra-ui/react'
 import * as FaIcons from 'react-icons/fa'
+import Link from 'next/link'
+
+type FeatureIconName = 'FaHeart' | 'FaLightbulb' | 'FaRobot' | 'FaUsers' | 'FaCode';
+
+interface Feature {
+  iconName: FeatureIconName;
+  title: string;
+  description: string;
+}
 
 export default function Home() {
-  const features = [
+  const features: Feature[] = [
     {
       iconName: 'FaHeart',
       title: "開発者の気持ちに寄り添う",
@@ -50,38 +59,42 @@ export default function Home() {
             bgGradient="linear(to-r, blue.400, purple.500)"
             bgClip="text"
           >
-            あなたの開発物語を共有しよう
+            ☆みんなのアプリ☆
           </Heading>
           <Text fontSize="xl" mb={8} color="gray.600">
-            完成品じゃなくてもいい。<br />
-            作りかけのアプリ、開発中の試行錯誤、<br />
-            その全てが誰かの励みになる。
+            完成したアプリを見せたい！<br />
+            開発の楽しさや苦しみを伝えたい！<br />
+            自作アプリの失敗や成功談を見聞きしたい！<br />
           </Text>
           <Stack 
             direction={{ base: 'column', sm: 'row' }} 
             spacing={4} 
             justify="center"
           >
-            <Button 
-              size="lg" 
-              colorScheme="blue"
-              leftIcon={<Icon as={FaIcons.FaSearch} />}
-            >
-              みんなのアプリを見る
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              colorScheme="blue"
-              leftIcon={<Icon as={FaIcons.FaStar} />}
-              _hover={{
-                bg: 'yellow.50',
-                borderColor: 'yellow.400',
-                color: 'yellow.600'
-              }}
-            >
-              てめえのアプリを見せる
-            </Button>
+            <Link href="/show_app">
+              <Button 
+                size="lg" 
+                colorScheme="blue"
+                leftIcon={<Icon as={FaIcons.FaSearch} />}
+              >
+                みんなのアプリを見る
+              </Button>
+            </Link>
+            <Link href="/post_app">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                colorScheme="blue"
+                leftIcon={<Icon as={FaIcons.FaStar} />}
+                _hover={{
+                  bg: 'yellow.50',
+                  borderColor: 'yellow.400',
+                  color: 'yellow.600'
+                }}
+              >
+                わたしのアプリを見せる
+              </Button>
+            </Link>
           </Stack>
         </Box>
 
