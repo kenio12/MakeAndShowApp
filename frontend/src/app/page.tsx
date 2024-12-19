@@ -61,10 +61,17 @@ export default function Home() {
           >
             🗡️ 俺のアプリ🏴‍☠️
           </Heading>
-          <Text fontSize="xl" mb={8} color="gray.600">
-            アプリ見て！<br />
-            もう泣くなよ・・おれこそ泣きたいよ！
-          </Text>
+          <Container maxW="container.md" centerContent>
+            <Box pl={{ base: 4, md: "100px" }}>
+              <VStack align="start" spacing={2} my={4}>
+                <Text>A「うわーん（ToT）」</Text>
+                <Text>B「おい、どうした（？？）」</Text>
+                <Text>A「だれも見てくれない、俺のアプリ」</Text>
+                <Text>B「おい、今から見てやるから
+                  、泣くなよ！」</Text>
+              </VStack>
+            </Box>
+          </Container>
           <Stack 
             direction={{ base: 'column', sm: 'row' }} 
             spacing={4} 
@@ -76,7 +83,7 @@ export default function Home() {
                 colorScheme="blue"
                 leftIcon={<Icon as={FaIcons.FaSearch} />}
               >
-                あぷり達
+                見る
               </Button>
             </Link>
             <Link href="/post_app">
