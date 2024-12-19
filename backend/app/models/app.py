@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional, List
 
@@ -9,7 +9,7 @@ class App(BaseModel):
     description: str
     demo_url: Optional[str] = None
     source_url: Optional[str] = None
-    screenshots: List[HttpUrl] = Field(default_factory=list)
+    screenshots: List[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: Optional[datetime] = None
     user_id: str

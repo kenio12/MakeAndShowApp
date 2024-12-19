@@ -36,7 +36,25 @@ async def get_apps(skip: int = 0, limit: int = 10, db = Depends(get_db)):
     # MongoDBからアプリ一覧を取得
     cursor = db["apps"].find().skip(skip).limit(limit)
     apps = await cursor.to_list(length=limit)
-    return apps
+    
+    # MongoDBのドキュメントをJSON形式に変換
+    formatted_apps = []
+    for app in apps:
+        formatted_app = {
+            "_id": str(app["_id"]),
+            "name": app.get("name", ""),
+            "description": app.get("description", ""),
+            "prefix_icon": app.get("prefix_icon", "🗡️"),
+            "suffix_icon": app.get("suffix_icon", "🏴‍☠️"),
+            "demo_url": app.get("demo_url"),
+            "source_url": app.get("source_url"),
+            "screenshots": app.get("screenshots", []),
+            "created_at": app.get("created_at"),
+            "user_id": app.get("user_id", "")
+        }
+        formatted_apps.append(formatted_app)
+    
+    return formatted_apps
 
 @router.get("/apps/{app_id}")
 async def get_app(app_id: str, db = Depends(get_db)):

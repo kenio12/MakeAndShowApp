@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react'
 import { Box, Container, Heading, VStack, FormControl, FormLabel, Input, Textarea, Button, useToast, SimpleGrid, Image, IconButton } from '@chakra-ui/react'
 import Link from 'next/link'
 import { CloseIcon } from '@chakra-ui/icons'
+import { useRouter } from 'next/navigation';
 
 interface AppFormData {
   name: string;
@@ -45,6 +46,7 @@ export default function PostAppPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previews, setPreviews] = useState<string[]>([]);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -78,6 +80,8 @@ export default function PostAppPage() {
     try {
       setIsSubmitting(true);
       
+      let uploadedUrls: string[] = [];
+      
       // まず画像をアップロード
       if (formData.screenshots && formData.screenshots.length > 0) {
         const imageFormData = new FormData();
@@ -94,11 +98,10 @@ export default function PostAppPage() {
           throw new Error('画像のアップロードに失敗しました');
         }
 
-        const uploadedUrls = await uploadResponse.json();
-        // ... 残りのフォームデータと一緒に送信する処理 ...
+        uploadedUrls = await uploadResponse.json();
       }
 
-      // 仮のユーザーを作ったので、あとでユーザー登録作ること！
+      // アプリデータを送信（スクリーンショットのURLを含む）
       const response = await fetch('http://localhost:8000/api/apps/', {
         method: 'POST',
         headers: {
@@ -106,10 +109,13 @@ export default function PostAppPage() {
         },
         body: JSON.stringify({
           name: formData.name,
+          prefix_icon: formData.prefix_icon,
+          suffix_icon: formData.suffix_icon,
           description: formData.description,
           demo_url: formData.demoUrl || null,
           source_url: formData.sourceUrl || null,
-          user_id: "development_user_001"
+          user_id: "development_user_001",
+          screenshots: uploadedUrls
         })
       });
       
@@ -128,7 +134,7 @@ export default function PostAppPage() {
         title: "投稿成功！",
         description: "アプリの情報が正常に投稿されました。",
         status: "success",
-        duration: 5000,
+        duration: 3000,
         isClosable: true,
       });
       
@@ -142,6 +148,11 @@ export default function PostAppPage() {
         sourceUrl: '',
         screenshots: []
       });
+
+      // 少し待ってからリダイレクト（トーストメッセージを見せるため）
+      setTimeout(() => {
+        router.push('/show_app');
+      }, 1000);
       
     } catch (error: unknown) {
       let errorMessage = "予期せぬエラーが発生しました";

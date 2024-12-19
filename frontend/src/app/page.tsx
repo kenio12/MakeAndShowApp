@@ -59,11 +59,11 @@ export default function Home() {
             bgGradient="linear(to-r, blue.400, purple.500)"
             bgClip="text"
           >
-            🗡️ 俺のアプリ 🏴‍☠️
+            🗡️ 俺のアプリ🏴‍☠️
           </Heading>
           <Text fontSize="xl" mb={8} color="gray.600">
-            アプリをご覧あれ<br />
-            もう泣くなよ・・おれも泣いてる（TT）
+            アプリ見て！<br />
+            もう泣くなよ・・おれこそ泣きたいよ！
           </Text>
           <Stack 
             direction={{ base: 'column', sm: 'row' }} 

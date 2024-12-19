@@ -5,6 +5,10 @@ WORKDIR /app
 COPY package*.json ./
 
 RUN npm install
+RUN npm install @phosphor-icons/react
+
+COPY next.config.js ./
+COPY tsconfig.json ./
 
 COPY . .
 
