@@ -59,12 +59,11 @@ export default function Home() {
             bgGradient="linear(to-r, blue.400, purple.500)"
             bgClip="text"
           >
-            ☆みんなのアプリ☆
+            🗡️ 俺のアプリ 🏴‍☠️
           </Heading>
           <Text fontSize="xl" mb={8} color="gray.600">
-            完成したアプリを見せたい！<br />
-            開発の楽しさや苦しみを伝えたい！<br />
-            自作アプリの失敗や成功談を見聞きしたい！<br />
+            アプリをご覧あれ<br />
+            もう泣くなよ・・おれも泣いてる（TT）
           </Text>
           <Stack 
             direction={{ base: 'column', sm: 'row' }} 
@@ -77,7 +76,7 @@ export default function Home() {
                 colorScheme="blue"
                 leftIcon={<Icon as={FaIcons.FaSearch} />}
               >
-                みんなのアプリを見る
+                あぷり達
               </Button>
             </Link>
             <Link href="/post_app">
@@ -92,7 +91,7 @@ export default function Home() {
                   color: 'yellow.600'
                 }}
               >
-                わたしのアプリを見せる
+                見せる
               </Button>
             </Link>
           </Stack>

@@ -1,37 +1,49 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from typing import List
 from ..database import get_db
 from ..models.app import App
-from pydantic import BaseModel
+from datetime import datetime
+from bson import ObjectId
+import json
 
 router = APIRouter()
 
-class AppCreate(BaseModel):
-    name: str
-    description: str
-    demo_url: str | None = None
-    source_url: str | None = None
+# ObjectIdをJSON形式に変換するためのヘルパー関数
+def serialize_object_id(obj):
+    if isinstance(obj, ObjectId):
+        return str(obj)
+    raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
-class AppResponse(BaseModel):
-    id: int
-    name: str
-    description: str
-    demo_url: str | None
-    source_url: str | None
+@router.post("/apps/")
+async def create_app(app: App, db = Depends(get_db)):
+    app_dict = app.model_dump()
+    app_dict["created_at"] = datetime.utcnow()
+    
+    # MongoDBに保存
+    result = await db["apps"].insert_one(app_dict)
+    
+    # 保存したドキュメントを取得
+    created_app = await db["apps"].find_one({"_id": result.inserted_id})
+    
+    # ObjectIdを文字列に変換
+    if created_app:
+        created_app["_id"] = str(created_app["_id"])
+    
+    return created_app
 
-    class Config:
-        from_attributes = True
+@router.get("/apps/")
+async def get_apps(skip: int = 0, limit: int = 10, db = Depends(get_db)):
+    # MongoDBからアプリ一覧を取得
+    cursor = db["apps"].find().skip(skip).limit(limit)
+    apps = await cursor.to_list(length=limit)
+    return apps
 
-@router.post("/apps/", response_model=AppResponse)
-def create_app(app: AppCreate, db: Session = Depends(get_db)):
-    db_app = App(**app.model_dump())
-    db.add(db_app)
-    db.commit()
-    db.refresh(db_app)
-    return db_app
-
-@router.get("/apps/", response_model=List[AppResponse])
-def get_apps(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    apps = db.query(App).offset(skip).limit(limit).all()
-    return apps 
+@router.get("/apps/{app_id}")
+async def get_app(app_id: str, db = Depends(get_db)):
+    from bson import ObjectId
+    
+    # 特定のアプリを取得
+    app = await db["apps"].find_one({"_id": ObjectId(app_id)})
+    if app is None:
+        raise HTTPException(status_code=404, detail="App not found")
+    return app

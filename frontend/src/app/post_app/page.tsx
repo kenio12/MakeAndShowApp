@@ -1,14 +1,18 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Box, Container, Heading, VStack, FormControl, FormLabel, Input, Textarea, Button, useToast } from '@chakra-ui/react'
+import React, { useState, useRef } from 'react'
+import { Box, Container, Heading, VStack, FormControl, FormLabel, Input, Textarea, Button, useToast, SimpleGrid, Image, IconButton } from '@chakra-ui/react'
 import Link from 'next/link'
+import { CloseIcon } from '@chakra-ui/icons'
 
 interface AppFormData {
   name: string;
+  prefix_icon: string;
+  suffix_icon: string;
   description: string;
   demoUrl: string;
   sourceUrl: string;
+  screenshots: File[];
 }
 
 interface ApiError {
@@ -31,11 +35,16 @@ export default function PostAppPage() {
   const toast = useToast()
   const [formData, setFormData] = useState<AppFormData>({
     name: '',
+    prefix_icon: '🗡️',
+    suffix_icon: '🏴‍☠️',
     description: '',
     demoUrl: '',
-    sourceUrl: ''
+    sourceUrl: '',
+    screenshots: []
   })
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previews, setPreviews] = useState<string[]>([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -45,12 +54,51 @@ export default function PostAppPage() {
     }))
   }
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setFormData(prev => ({
+        ...prev,
+        screenshots: files
+      }));
+
+      // プレビュー用のURL生成
+      const newPreviews = files.map(file => URL.createObjectURL(file));
+      setPreviews(prev => {
+        // 古いプレビューのURLを解放
+        prev.forEach(url => URL.revokeObjectURL(url));
+        return newPreviews;
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     try {
       setIsSubmitting(true);
       
+      // まず画像をアップロード
+      if (formData.screenshots && formData.screenshots.length > 0) {
+        const imageFormData = new FormData();
+        formData.screenshots.forEach(file => {
+          imageFormData.append('files', file);
+        });
+
+        const uploadResponse = await fetch('http://localhost:8000/api/upload/screenshots', {
+          method: 'POST',
+          body: imageFormData
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('画像のアップロードに失敗しました');
+        }
+
+        const uploadedUrls = await uploadResponse.json();
+        // ... 残りのフォームデータと一緒に送信する処理 ...
+      }
+
+      // 仮のユーザーを作ったので、あとでユーザー登録作ること！
       const response = await fetch('http://localhost:8000/api/apps/', {
         method: 'POST',
         headers: {
@@ -60,7 +108,8 @@ export default function PostAppPage() {
           name: formData.name,
           description: formData.description,
           demo_url: formData.demoUrl || null,
-          source_url: formData.sourceUrl || null
+          source_url: formData.sourceUrl || null,
+          user_id: "development_user_001"
         })
       });
       
@@ -86,9 +135,12 @@ export default function PostAppPage() {
       // フォームをリセット
       setFormData({
         name: '',
+        prefix_icon: '',
+        suffix_icon: '',
         description: '',
         demoUrl: '',
-        sourceUrl: ''
+        sourceUrl: '',
+        screenshots: []
       });
       
     } catch (error: unknown) {
@@ -122,7 +174,7 @@ export default function PostAppPage() {
     <Container maxW="container.md" py={10}>
       <VStack spacing={8} align="stretch">
         <Heading as="h1" size="xl" mb={6}>
-          アプリを投稿する
+          アプリをみせる！
         </Heading>
 
         <Box as="form" onSubmit={handleSubmit}>
@@ -166,6 +218,57 @@ export default function PostAppPage() {
                 onChange={handleChange}
                 placeholder="https://github.com/..." 
               />
+            </FormControl>
+
+            <FormControl>
+              <FormLabel>スクリーンショット</FormLabel>
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileChange}
+                display="none"
+                ref={fileInputRef}
+              />
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                colorScheme="blue"
+                variant="outline"
+              >
+                画像を選択
+              </Button>
+              
+              {/* プレビュー表示 */}
+              {previews.length > 0 && (
+                <SimpleGrid columns={3} spacing={4} mt={4}>
+                  {previews.map((preview, index) => (
+                    <Box key={index} position="relative">
+                      <Image
+                        src={preview}
+                        alt={`Preview ${index + 1}`}
+                        borderRadius="md"
+                      />
+                      <IconButton
+                        aria-label="Remove image"
+                        icon={<CloseIcon />}
+                        size="sm"
+                        position="absolute"
+                        top={1}
+                        right={1}
+                        onClick={() => {
+                          // プレビューと選択された画像を削除
+                          URL.revokeObjectURL(preview);
+                          setPreviews(prev => prev.filter((_, i) => i !== index));
+                          setFormData(prev => ({
+                            ...prev,
+                            screenshots: prev.screenshots.filter((_, i) => i !== index)
+                          }));
+                        }}
+                      />
+                    </Box>
+                  ))}
+                </SimpleGrid>
+              )}
             </FormControl>
 
             <Box>

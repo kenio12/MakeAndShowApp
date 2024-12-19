@@ -1,15 +1,32 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.sql import func
-from ..database import Base
+from pydantic import BaseModel, Field, HttpUrl
+from datetime import datetime
+from typing import Optional, List
 
-class App(Base):
-    __tablename__ = "apps"
+class App(BaseModel):
+    name: str
+    prefix_icon: str = Field(default="🗡️")
+    suffix_icon: str = Field(default="🏴‍☠️")
+    description: str
+    demo_url: Optional[str] = None
+    source_url: Optional[str] = None
+    screenshots: List[HttpUrl] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = None
+    user_id: str
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False)
-    description = Column(String, nullable=False)
-    demo_url = Column(String)
-    source_url = Column(String)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    user_id = Column(Integer, ForeignKey("users.id")) 
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "name": "My App",
+                "prefix_icon": "🗡️",
+                "suffix_icon": "🏴‍☠️",
+                "description": "This is my awesome app",
+                "demo_url": "https://demo.example.com",
+                "source_url": "https://github.com/example/myapp",
+                "screenshots": [
+                    "https://example.com/screenshots/1.jpg",
+                    "https://example.com/screenshots/2.jpg"
+                ],
+                "user_id": "507f1f77bcf86cd799439011"
+            }
+        }

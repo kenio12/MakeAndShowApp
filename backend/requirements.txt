@@ -11,3 +11,7 @@ python-dotenv==1.0.0
 emails==0.6 
 pydantic-settings==2.1.0
 email-validator==2.1.0
+pymongo==4.6.1
+motor==3.3.2
+aiofiles
+cloudinary==1.37.0
