@@ -152,7 +152,7 @@ export default function PostAppPage() {
 
       // 少し待ってからリダイレクト（トーストメッセージを見せるため）
       setTimeout(() => {
-        router.push('/show_app');
+        router.push('/');
       }, 1000);
       
     } catch (error: unknown) {

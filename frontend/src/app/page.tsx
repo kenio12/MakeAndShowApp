@@ -1,86 +1,98 @@
 'use client'
 
-import { Box, Container, Heading, Text, VStack, Button, Stack, Icon } from '@chakra-ui/react'
-import * as FaIcons from 'react-icons/fa'
-import Link from 'next/link'
+import { Box, Container, Heading, Text, VStack, SimpleGrid, Image } from '@chakra-ui/react'
+import { useState, useEffect } from 'react'
+
+interface App {
+  _id: string
+  name: string
+  description: string
+  demo_url?: string
+  source_url?: string
+  screenshots: string[]
+  created_at: string
+  user_id: string
+}
 
 export default function Home() {
+  const [apps, setApps] = useState<App[]>([])
+
+  useEffect(() => {
+    const fetchApps = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/apps/')
+        const data = await response.json()
+        setApps(data)
+      } catch (error) {
+        console.error('アプリの取得に失敗しました:', error)
+      }
+    }
+
+    fetchApps()
+  }, [])
+
   return (
-    <Box 
-      bg="blue.50" 
-      h="calc(100vh - 64px - 10px)" 
-      p={0}
-      overflow="hidden"
-    >
-      <Container 
-        maxW="container.xl" 
-        h="full" 
-        display="flex" 
-        alignItems="flex-start"
-        justifyContent="center"
-        pt="15vh"
-        overflow="hidden"
-      >
-        <VStack spacing={1} align="center" w="full">
-          {/* ヒーローセクション */}
-          <Box 
-            textAlign="center" 
-            py={0}
-            bg="blue.50"
-            px={4}
-            border="none"
-            shadow="none"
-          >
-            <Heading 
-              as="h1" 
-              size="2xl" 
-              mb={1}
-              bgGradient="linear(to-r, blue.400, purple.500)"
-              bgClip="text"
-            >
-              🗡️ 俺のアプリ🏴‍☠️
+    <Box bg="blue.50" minH="100vh" py={10}>
+      <Container maxW="container.xl">
+        <VStack spacing={8} align="stretch">
+          <Box textAlign="center">
+            <Heading as="h1" size="2xl" mb={4}>
+              🏴‍☠️ 俺のアプリ 💀
             </Heading>
-            <Container maxW="container.md" centerContent>
-              <Box pl={{ base: 4, md: "100px" }}>
-                <VStack align="start" spacing={1} my={2}>
-                  <Text>A「うわーん（ToT）」</Text>
-                  <Text>B「おい、どうした（？？）」</Text>
-                  <Text>A「だれも見てくれない、俺のアプリ」</Text>
-                  <Text>B「おい、今から見てるから、泣くなよ！」</Text>
-                </VStack>
-              </Box>
-            </Container>
-            <Stack 
-              direction={{ base: 'column', sm: 'row' }} 
-              spacing={4} 
-              justify="center"
-            >
-              <Link href="/show_app">
-                <Button 
-                  size="lg" 
-                  colorScheme="blue"
-                  leftIcon={<Icon as={FaIcons.FaSearch} />}
-                >
-                  見てやる
-                </Button>
-              </Link>
-              <Link href="/post_app">
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  colorScheme="blue"
-                  leftIcon={<Icon as={FaIcons.FaStar} />}
-                  _hover={{
-                    bg: 'yellow.50',
-                    borderColor: 'yellow.400',
-                    color: 'yellow.600'
-                  }}
-                >
-                  見せてやる
-                </Button>
-              </Link>
-            </Stack>
+            <Text fontSize="xl" color="gray.600">
+              作ったアプリを見せてやる！
+            </Text>
           </Box>
+
+          <SimpleGrid columns={1} spacing={8} w="full">
+            {apps.map((app) => (
+              <Box
+                key={app._id}
+                p={6}
+                borderRadius="lg"
+                boxShadow="md"
+                bg="white"
+                _hover={{ transform: 'translateY(-4px)', transition: '0.3s' }}
+              >
+                <Heading as="h2" size="md" mb={3}>
+                  {app.name}
+                </Heading>
+
+                {app.screenshots && app.screenshots.length > 0 && (
+                  <Box 
+                    mb={4} 
+                    borderRadius="md" 
+                    overflow="hidden"
+                    position="relative"
+                    width="100%"
+                    maxHeight="500px"
+                  >
+                    <Image
+                      src={app.screenshots[0]}
+                      alt={`${app.name}のスクリーンショット`}
+                      style={{
+                        width: 'auto',
+                        height: 'auto',
+                        maxWidth: '100%',
+                        maxHeight: '500px',
+                        margin: 'auto',
+                        display: 'block'
+                      }}
+                      objectFit="contain"
+                      backgroundColor="gray.100"
+                    />
+                  </Box>
+                )}
+
+                <Text color="gray.600" mb={4}>
+                  {app.description}
+                </Text>
+                <Text fontSize="sm" color="gray.500" mb={2}>
+                  作成者: {app.user_id}
+                </Text>
+              </Box>
+            ))}
+          </SimpleGrid>
         </VStack>
       </Container>
     </Box>

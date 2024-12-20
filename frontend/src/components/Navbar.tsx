@@ -29,20 +29,13 @@ export default function Navbar() {
 
         <Flex alignItems={'center'}>
           <Stack direction={'row'} spacing={4}>
-            <Link href="/show_app">
-              <Button 
-                variant={'ghost'}
-                _hover={{ bg: 'blue.200' }}
-              >
-                見てやる
-              </Button>
-            </Link>
             <Link href="/post_app">
               <Button 
-                variant={'ghost'}
-                _hover={{ bg: 'blue.200' }}
+                variant={'solid'}
+                colorScheme={'green'}
+                _hover={{ bg: 'green.500' }}
               >
-                見せてやる
+                アプリを紹介する
               </Button>
             </Link>
             <Link href="/login">
