@@ -182,123 +182,135 @@ export default function PostAppPage() {
   }
 
   return (
-    <Container maxW="container.md" py={10}>
-      <VStack spacing={8} align="stretch">
-        <Heading as="h1" size="xl" mb={6}>
-          アプリをみせる！
-        </Heading>
+    <Box bg="blue.50" minH="100vh" py={10}>
+      <Container maxW="container.xl">
+        <VStack spacing={8}>
+          <Heading as="h1" size="xl">
+            アプリを見せてやる
+          </Heading>
 
-        <Box as="form" onSubmit={handleSubmit}>
-          <VStack spacing={6}>
-            <FormControl isRequired>
-              <FormLabel>アプリ名</FormLabel>
-              <Input 
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="あなたのアプリの名前" 
-              />
-            </FormControl>
+          <Box 
+            w="full" 
+            maxW="800px" 
+            p={8} 
+            borderRadius="xl" 
+            bg="blue.50"
+          >
+            <VStack spacing={6}>
+              <FormControl isRequired>
+                <FormLabel>アプリ名</FormLabel>
+                <Input 
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="あなたのアプリの名前" 
+                  bg="white"
+                />
+              </FormControl>
 
-            <FormControl isRequired>
-              <FormLabel>説明</FormLabel>
-              <Textarea 
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="アプリの説明、開発秘話、苦労した点など" 
-                rows={6}
-              />
-            </FormControl>
+              <FormControl isRequired>
+                <FormLabel>説明</FormLabel>
+                <Textarea 
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="アプリの説明、開発秘話、苦労した点など" 
+                  rows={6}
+                  bg="white"
+                />
+              </FormControl>
 
-            <FormControl>
-              <FormLabel>デモURL</FormLabel>
-              <Input 
-                name="demoUrl"
-                value={formData.demoUrl}
-                onChange={handleChange}
-                placeholder="https://..." 
-              />
-            </FormControl>
+              <FormControl>
+                <FormLabel>デモURL</FormLabel>
+                <Input 
+                  name="demoUrl"
+                  value={formData.demoUrl}
+                  onChange={handleChange}
+                  placeholder="https://..." 
+                  bg="white"
+                />
+              </FormControl>
 
-            <FormControl>
-              <FormLabel>ソースコードURL</FormLabel>
-              <Input 
-                name="sourceUrl"
-                value={formData.sourceUrl}
-                onChange={handleChange}
-                placeholder="https://github.com/..." 
-              />
-            </FormControl>
+              <FormControl>
+                <FormLabel>ソースコードURL</FormLabel>
+                <Input 
+                  name="sourceUrl"
+                  value={formData.sourceUrl}
+                  onChange={handleChange}
+                  placeholder="https://github.com/..." 
+                  bg="white"
+                />
+              </FormControl>
 
-            <FormControl>
-              <FormLabel>スクリーンショット</FormLabel>
-              <Input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleFileChange}
-                display="none"
-                ref={fileInputRef}
-              />
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                colorScheme="blue"
-                variant="outline"
-              >
-                画像を選択
-              </Button>
-              
-              {/* プレビュー表示 */}
-              {previews.length > 0 && (
-                <SimpleGrid columns={3} spacing={4} mt={4}>
-                  {previews.map((preview, index) => (
-                    <Box key={index} position="relative">
-                      <Image
-                        src={preview}
-                        alt={`Preview ${index + 1}`}
-                        borderRadius="md"
-                      />
-                      <IconButton
-                        aria-label="Remove image"
-                        icon={<CloseIcon />}
-                        size="sm"
-                        position="absolute"
-                        top={1}
-                        right={1}
-                        onClick={() => {
-                          // プレビューと選択された画像を削除
-                          URL.revokeObjectURL(preview);
-                          setPreviews(prev => prev.filter((_, i) => i !== index));
-                          setFormData(prev => ({
-                            ...prev,
-                            screenshots: prev.screenshots.filter((_, i) => i !== index)
-                          }));
-                        }}
-                      />
-                    </Box>
-                  ))}
-                </SimpleGrid>
-              )}
-            </FormControl>
+              <FormControl>
+                <FormLabel>スクリーンショット</FormLabel>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileChange}
+                  display="none"
+                  ref={fileInputRef}
+                />
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  colorScheme="blue"
+                  variant="outline"
+                >
+                  画像を選択
+                </Button>
+                
+                {/* プレビュー表示 */}
+                {previews.length > 0 && (
+                  <SimpleGrid columns={3} spacing={4} mt={4}>
+                    {previews.map((preview, index) => (
+                      <Box key={index} position="relative">
+                        <Image
+                          src={preview}
+                          alt={`Preview ${index + 1}`}
+                          borderRadius="md"
+                        />
+                        <IconButton
+                          aria-label="Remove image"
+                          icon={<CloseIcon />}
+                          size="sm"
+                          position="absolute"
+                          top={1}
+                          right={1}
+                          onClick={() => {
+                            // プレビューと選択された画像を削除
+                            URL.revokeObjectURL(preview);
+                            setPreviews(prev => prev.filter((_, i) => i !== index));
+                            setFormData(prev => ({
+                              ...prev,
+                              screenshots: prev.screenshots.filter((_, i) => i !== index)
+                            }));
+                          }}
+                        />
+                      </Box>
+                    ))}
+                  </SimpleGrid>
+                )}
+              </FormControl>
 
-            <Box>
-              <Button 
-                type="submit" 
-                colorScheme="blue" 
-                mr={4}
-                isLoading={isSubmitting}
-                loadingText="投稿中..."
-              >
-                投稿する
-              </Button>
-              <Button as={Link} href="/" variant="ghost">
-                キャンセル
-              </Button>
-            </Box>
-          </VStack>
-        </Box>
-      </VStack>
-    </Container>
+              <Box>
+                <Button 
+                  type="submit" 
+                  colorScheme="blue" 
+                  mr={4}
+                  isLoading={isSubmitting}
+                  loadingText="投稿中..."
+                >
+                  投稿する
+                </Button>
+                <Button as={Link} href="/" variant="ghost">
+                  キャンセル
+                </Button>
+              </Box>
+            </VStack>
+          </Box>
+        </VStack>
+      </Container>
+    </Box>
   )
 } 
