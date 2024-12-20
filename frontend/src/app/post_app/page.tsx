@@ -1,10 +1,11 @@
 'use client'
 
 import React, { useState, useRef } from 'react'
-import { Box, Container, Heading, VStack, FormControl, FormLabel, Input, Textarea, Button, useToast, SimpleGrid, Image, IconButton } from '@chakra-ui/react'
+import { Box, Container, Heading, VStack, FormControl, FormLabel, Input, Textarea, Button, useToast, SimpleGrid, Image, IconButton, Text, Icon } from '@chakra-ui/react'
 import Link from 'next/link'
 import { CloseIcon } from '@chakra-ui/icons'
 import { useRouter } from 'next/navigation';
+import { FaUpload } from 'react-icons/fa'
 
 interface AppFormData {
   name: string;
@@ -252,13 +253,52 @@ export default function PostAppPage() {
                   display="none"
                   ref={fileInputRef}
                 />
-                <Button
-                  onClick={() => fileInputRef.current?.click()}
-                  colorScheme="blue"
-                  variant="outline"
+                
+                <Box
+                  bg="white"
+                  p={6}
+                  borderRadius="md"
+                  borderWidth="2px"
+                  borderStyle="dashed"
+                  borderColor="blue.300"
+                  textAlign="center"
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    const files = Array.from(e.dataTransfer.files)
+                    if (files.some(file => !file.type.startsWith('image/'))) {
+                      toast({
+                        title: "エラー",
+                        description: "画像ファイルのみアップロードできます",
+                        status: "error",
+                        duration: 3000,
+                        isClosable: true,
+                      })
+                      return
+                    }
+                    const event = { target: { files: e.dataTransfer.files } } as unknown as React.ChangeEvent<HTMLInputElement>
+                    handleFileChange(event)
+                  }}
                 >
-                  画像を選択
-                </Button>
+                  <VStack spacing={2}>
+                    <Icon as={FaUpload} w={8} h={8} color="blue.400" />
+                    <Text>
+                      ドラッグ&ドロップ または
+                    </Text>
+                    <Button
+                      onClick={() => fileInputRef.current?.click()}
+                      colorScheme="blue"
+                      variant="outline"
+                      bg="white"
+                    >
+                      画像を選択
+                    </Button>
+                  </VStack>
+                </Box>
                 
                 {/* プレビュー表示 */}
                 {previews.length > 0 && (

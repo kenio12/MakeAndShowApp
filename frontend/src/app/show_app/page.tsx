@@ -63,7 +63,7 @@ export default function ShowAppPage() {
       <Container maxW="container.xl">
         <VStack spacing={8} align="stretch">
           <Heading as="h1" size="xl" mb={6}>
-            あぷり達
+            アプリ集
           </Heading>
           
           <Box w="full" maxW="600px" mx="auto">
