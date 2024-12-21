@@ -92,17 +92,26 @@ const handleSubmit = async () => {
 
   try {
     isLoading.value = true
-    const result = await authStore.register({
-      email: formData.value.email,
-      username: formData.value.username,
-      password: formData.value.password
+    const response = await fetch('http://localhost:8000/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData.value),
+      credentials: 'include'
     })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.detail || 'サインアップに失敗しました')
+    }
+
+    alert('サインアップが完了しました！メールを確認して、アカウントを有効化してください。')
     
-    console.log('Registration successful:', result)  // デバッグ用
-    alert('確認メールを送信しました。メールを確認して登録を完了してください。')
     router.push('/login')
+    
   } catch (error) {
-    console.error('Registration error:', error)  // デバッグ用
     alert(error instanceof Error ? error.message : '予期せぬエラーが発生しました')
   } finally {
     isLoading.value = false

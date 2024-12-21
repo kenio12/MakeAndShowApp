@@ -10,64 +10,83 @@ from jose import jwt
 from jose import JWTError
 from app.config import settings
 from datetime import datetime
+from fastapi.responses import Response
+import bcrypt
+import uuid
+from ..redis_client import redis_client
+from fastapi.responses import JSONResponse
 
 router = APIRouter(tags=["auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
+async def create_session(user_id: str) -> str:
+    session_id = str(uuid.uuid4())
+    await redis_client.set(f"session:{session_id}", user_id, ex=1800)
+    return session_id
+
 @router.post("/register", response_model=UserResponse)
-async def register(user: UserCreate, db: AsyncIOMotorDatabase = Depends(get_db)):
+async def register(user: UserCreate, response: Response, db: AsyncIOMotorDatabase = Depends(get_db)):
     try:
         print("===== Registration Debug =====")
-        print(f"MongoDB URI: {settings.MONGODB_URI}")  # 接続先URL
-        print(f"Database instance: {db}")  # データベースインスタンス
-        print(f"Database name: {db.name}")  # データベース名
-        print(f"Collections: {await db.list_collection_names()}")  # コレクション一覧
+        print(f"MongoDB URI: {settings.MONGODB_URI}")
+        print(f"Database instance: {db}")
+        print(f"Database name: {db.name}")
+        print(f"Collections: {await db.list_collection_names()}")
+        
+        # メールアドレスの重複チェック
         existing_user = await db.users.find_one({"email": user.email})
-        print(f"Existing user check: {existing_user}")  # 既存ユーザーの検索結果
-        print("============================")
+        print(f"Existing user check: {existing_user}")
         
         if existing_user:
-            raise HTTPException(
+            return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered"
+                content={"detail": "Email already registered"}
             )
         
         # ユーザー名の重複チェック
         if await db.users.find_one({"username": user.username}):
-            raise HTTPException(
+            return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Username already taken"
+                content={"detail": "Username already taken"}
             )
         
         # 確認トークンを生成
         verification_token = create_verification_token(user.email)
         
-        # 新規ユーザーの作成
+        # 新規ユーザーの作成（is_activeとis_verifiedをFalseに設定）
         user_dict = {
             "email": user.email,
             "username": user.username,
             "hashed_password": get_password_hash(user.password),
-            "is_active": False,
-            "is_verified": False,
+            "is_active": False,  # アカウントは非アクティブ
+            "is_verified": False,  # メール未確認
             "verification_token": verification_token,
             "created_at": datetime.utcnow()
         }
         
         result = await db.users.insert_one(user_dict)
-        
-        # 作成したユーザーを取得
         created_user = await db.users.find_one({"_id": result.inserted_id})
-        
-        # MongoDBの_idをstrに変換
         created_user["_id"] = str(created_user["_id"])
         
         # 確認メールの送信
         await send_verification_email(user.email, user.username, verification_token)
         
-        return created_user  # MongoDBから取得したデータをそのまま返す
+        # セッションは作成しない（メール確認後にログインさせる）
+        return {
+            "message": "Registration successful. Please check your email to verify your account.",
+            "user": {
+                "id": str(created_user["_id"]),
+                "email": created_user["email"],
+                "username": created_user["username"]
+            }
+        }
+        
     except Exception as e:
-        print(f"Registration error: {str(e)}")  # デバッグ用
-        raise
+        print(f"Registration error: {str(e)}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": str(e)}
+        )
 
 @router.post("/login")
 async def login(
@@ -76,15 +95,31 @@ async def login(
 ):
     # ユーザーの検索
     user = await db.users.find_one({"email": form_data.username})
+    
+    # ユーザーが存在しないかパスワードが間違っている場合
     if not user or not verify_password(form_data.password, user["hashed_password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password"
         )
     
+    # メール認証が完了していない場合
+    if not user.get("is_verified", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Please verify your email before logging in"
+        )
+    
+    # アカウントが有効でない場合
+    if not user.get("is_active", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is not active"
+        )
+    
     # JWTトークンの生成
     access_token = create_access_token(data={"sub": user["email"]})
-    return {"access_token": access_token, "token_type": "bearer"} 
+    return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/verify-email/{token}")
 async def verify_email(token: str, db: AsyncIOMotorDatabase = Depends(get_db)):
