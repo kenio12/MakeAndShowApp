@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 from ..database import get_db
-from ..models.app import App
+from ..models.app import AppCreate
 from datetime import datetime
 from bson import ObjectId
 import json
 
-router = APIRouter(prefix="/api")
+router = APIRouter()
 
 # ObjectIdをJSON形式に変換するためのヘルパー関数
 def serialize_object_id(obj):
@@ -14,24 +14,32 @@ def serialize_object_id(obj):
         return str(obj)
     raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
-@router.post("/apps/")
-async def create_app(app: App, db = Depends(get_db)):
-    app_dict = app.model_dump()
-    app_dict["created_at"] = datetime.utcnow()
-    
-    # MongoDBに保存
-    result = await db["apps"].insert_one(app_dict)
-    
-    # 保存したドキュメントを取得
-    created_app = await db["apps"].find_one({"_id": result.inserted_id})
-    
-    # ObjectIdを文字列に変換
-    if created_app:
-        created_app["_id"] = str(created_app["_id"])
-    
-    return created_app
+@router.post("/")
+async def create_app(app: AppCreate, db = Depends(get_db)):
+    try:
+        print("Creating new app:", app.dict())  # デバッグ用
+        
+        # アプリデータを辞書形式に変換
+        app_dict = app.dict()
+        app_dict["created_at"] = datetime.utcnow()
+        
+        # MongoDBに保存
+        result = await db["apps"].insert_one(app_dict)
+        
+        # 保存したドキュメントを取得
+        created_app = await db["apps"].find_one({"_id": result.inserted_id})
+        
+        # ObjectIdを文字列に変換
+        if created_app:
+            created_app["_id"] = str(created_app["_id"])
+            print("App created successfully:", created_app)  # デバッグ用
+            return created_app
+            
+    except Exception as e:
+        print("Error creating app:", str(e))  # デバッグ用
+        raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/apps/")
+@router.get("/")
 async def get_apps(skip: int = 0, limit: int = 10, db = Depends(get_db)):
     # MongoDBからアプリ一覧を取得
     cursor = db["apps"].find().skip(skip).limit(limit)
@@ -44,7 +52,7 @@ async def get_apps(skip: int = 0, limit: int = 10, db = Depends(get_db)):
             "_id": str(app["_id"]),
             "name": app.get("name", ""),
             "description": app.get("description", ""),
-            "prefix_icon": app.get("prefix_icon", "🗡��"),
+            "prefix_icon": app.get("prefix_icon", "🗡️"),
             "suffix_icon": app.get("suffix_icon", "🏴‍☠️"),
             "demo_url": app.get("demo_url"),
             "source_url": app.get("source_url"),

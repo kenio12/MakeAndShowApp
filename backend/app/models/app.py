@@ -1,22 +1,23 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional, List
-from bson import ObjectId
 
-class App(BaseModel):
-    id: str = Field(alias="_id")
+class AppCreate(BaseModel):
     title: str
     description: str
-    github_url: str | None = None
-    demo_url: str | None = None
-    image_url: str | None = None
+    github_url: Optional[str] = None
+    demo_url: Optional[str] = None
+    image_url: Optional[str] = None
     app_types: list[str] = []
     prefix_icon: str = Field(default="🗡️")
     suffix_icon: str = Field(default="🏴‍☠️")
     screenshots: List[str] = Field(default_factory=list)
+    user_id: str
+
+class App(AppCreate):
+    id: str = Field(alias="_id")
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: Optional[datetime] = None
-    user_id: str
 
     class Config:
         json_schema_extra = {
