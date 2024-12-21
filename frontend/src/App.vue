@@ -1,25 +1,27 @@
 <template>
-  <div>
+  <div id="app">
     <Navbar />
-    <router-view></router-view>
+    <main class="main-content">
+      <router-view></router-view>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import Navbar from './components/Navbar.vue'
+import Navbar from '@/components/Navbar.vue'
 </script>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+<style>
+:root {
+  --navbar-height: 3rem;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+
+#app {
+  min-height: 100vh;
 }
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+.main-content {
+  padding-top: var(--navbar-height);  /* ナビバーの高さ分のパディング */
+  min-height: calc(100vh - var(--navbar-height));  /* 最小の高さを設定 */
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div class="post-app-container">
     <div class="container">
-      <h1 class="title">アプリを見せてやる</h1>
+      <h1 class="title">アプリを紹介する</h1>
 
       <div class="form-box">
         <form @submit.prevent="handleSubmit">

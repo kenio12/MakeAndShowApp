@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar">
+  <nav class="navbar" :class="{ 'navbar-hidden': !showNavbar }">
     <div class="container">
       <router-link to="/" class="brand">
         <span class="brand-text">
@@ -46,11 +46,42 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
 const router = useRouter()
+
+// スクロール関連の変数
+let lastScrollY = 0
+const showNavbar = ref(true)
+
+// スクロールハンドラー
+const handleScroll = () => {
+  const currentScrollY = window.scrollY
+  
+  // 上にスクロールした時はナビバーを表示
+  // 下にスクロールした時は隠す
+  // ただし、一番上にいる時は常に表示
+  if (currentScrollY <= 0) {
+    showNavbar.value = true
+  } else {
+    showNavbar.value = currentScrollY < lastScrollY
+  }
+  
+  lastScrollY = currentScrollY
+}
+
+// コンポーネントがマウントされた時にイベントリスナーを追加
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll, { passive: true })
+})
+
+// コンポーネントがアンマウントされた時にイベントリスナーを削除
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 
 const handleLogout = () => {
   authStore.logout()
@@ -60,19 +91,33 @@ const handleLogout = () => {
 
 <style scoped>
 .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   background-color: #2B6CB0;
-  padding: 0 1rem;
+  padding: 0.5rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid #2C5282;
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+.navbar-hidden {
+  transform: translateY(-100%);
+}
+
+:root {
+  --navbar-height: 3rem;
 }
 
 .container {
-  height: 4rem;
+  height: 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   max-width: 1280px;
   margin: 0 auto;
+  padding: 0 0.5rem;
 }
 
 .brand {
@@ -86,7 +131,7 @@ const handleLogout = () => {
 
 .brand-text {
   font-weight: bold;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   color: white;
   display: flex;
   align-items: center;
@@ -106,11 +151,11 @@ const handleLogout = () => {
 
 .nav-buttons {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .btn {
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 0.375rem;
   font-weight: 500;
   cursor: pointer;
@@ -118,6 +163,7 @@ const handleLogout = () => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 0.875rem;
 }
 
 .btn-green {
@@ -149,27 +195,26 @@ const handleLogout = () => {
 
 .btn-icon {
   font-size: 1.2rem;
-  display: none;  /* PCではアイコンを非表示 */
+  display: none;
 }
 
-/* スマホ表示用のメディアクエリ */
 @media (max-width: 640px) {
   .btn-text {
-    display: none;  /* スマホではテキストを非表示 */
+    display: none;
   }
 
   .btn-icon {
-    display: block;  /* スマホではアイコンを表示 */
+    display: block;
   }
 
   .btn {
-    padding: 0.5rem;  /* パディングを調整 */
-    min-width: 2.5rem;  /* 最小幅を設定 */
-    justify-content: center;  /* アイコンを中央寄せ */
+    padding: 0.5rem;
+    min-width: 2.5rem;
+    justify-content: center;
   }
 
   .nav-buttons {
-    gap: 0.5rem;  /* ボタン間の間隔を縮める */
+    gap: 0.5rem;
   }
 
   .brand-full-text {
@@ -186,7 +231,7 @@ const handleLogout = () => {
 }
 
 .btn-primary {
-  background-color: #805AD5;  /* 紫色 */
+  background-color: #805AD5;
   color: white;
 }
 
@@ -194,7 +239,6 @@ const handleLogout = () => {
   background-color: #6B46C1;
 }
 
-/* リンクの下線を削除 */
 .nav-buttons a {
   text-decoration: none;
 }
@@ -209,7 +253,7 @@ const handleLogout = () => {
 }
 
 .mobile-brand-btn {
-  display: none;  /* PCでは非表示 */
+  display: none;
   background-color: #4A5568;
   color: white;
   border: none;
@@ -232,14 +276,13 @@ const handleLogout = () => {
   vertical-align: middle;
 }
 
-/* スマホ表示用のメディアクエリ */
 @media (max-width: 640px) {
   .brand-full-text {
-    display: none;  /* PCテキストを非表示 */
+    display: none;
   }
 
   .mobile-brand-btn {
-    display: flex;  /* スマホではボタンを表示 */
+    display: flex;
   }
 
   .brand-text {
