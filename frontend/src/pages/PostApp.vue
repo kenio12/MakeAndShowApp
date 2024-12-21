@@ -48,6 +48,22 @@
           </div>
 
           <div class="form-control">
+            <label class="form-label">ジャンル</label>
+            <select
+              v-model="formData.genre"
+              class="form-input"
+              required
+            >
+              <option v-for="(label, genre) in AppGenreLabels" 
+                      :key="genre" 
+                      :value="genre"
+              >
+                {{ label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-control">
             <label class="form-label">スクリーンショット</label>
             <div
               class="dropzone"
@@ -105,6 +121,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { AppGenre, AppGenreLabels } from '@/types/app'
 
 const router = useRouter()
 const isSubmitting = ref(false)
@@ -117,7 +134,8 @@ const formData = ref({
   description: '',
   demoUrl: '',
   sourceUrl: '',
-  screenshots: [] as File[]
+  screenshots: [] as File[],
+  genre: AppGenre.UNSPECIFIED
 })
 
 const previews = ref<string[]>([])
@@ -189,7 +207,8 @@ const handleSubmit = async () => {
       github_url: formData.value.sourceUrl || null,
       screenshots: uploadedUrls,
       prefix_icon: formData.value.prefix_icon,
-      suffix_icon: formData.value.suffix_icon
+      suffix_icon: formData.value.suffix_icon,
+      genre: formData.value.genre
     }
 
     console.log('送信するデータ:', postData)

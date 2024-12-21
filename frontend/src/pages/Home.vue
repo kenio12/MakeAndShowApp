@@ -192,7 +192,7 @@ const formatDate = (dateString: string) => {
 }
 
 .screenshot-container {
-  margin-top: 2rem;
+  margin-top: 1rem;
   margin-bottom: 1rem;
   border-radius: 0.5rem;
   overflow: hidden;
@@ -301,7 +301,7 @@ const formatDate = (dateString: string) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1.5rem;
   position: relative;
 }
 

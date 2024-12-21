@@ -1,58 +1,29 @@
 export enum AppGenre {
-  UNSPECIFIED = 'UNSPECIFIED',
-  WEB = 'WEB_APP',
-  IOS = 'IOS_APP',
-  ANDROID = 'ANDROID_APP',
-  WINDOWS = 'WINDOWS_APP',
-  MAC = 'MAC_APP',
-  LINUX = 'LINUX_APP'
+  GAME = 'GAME',
+  TOOL = 'TOOL',
+  EDUCATION = 'EDUCATION',
+  ENTERTAINMENT = 'ENTERTAINMENT',
+  BUSINESS = 'BUSINESS',
+  SOCIAL = 'SOCIAL',
+  UNSPECIFIED = 'UNSPECIFIED'
 }
 
 export const AppGenreLabels: Record<AppGenre, string> = {
-  [AppGenre.UNSPECIFIED]: '指定なし',
-  [AppGenre.WEB]: 'Webアプリ',
-  [AppGenre.IOS]: 'iPhoneアプリ',
-  [AppGenre.ANDROID]: 'Androidアプリ',
-  [AppGenre.WINDOWS]: 'Windowsアプリ',
-  [AppGenre.MAC]: 'Macアプリ',
-  [AppGenre.LINUX]: 'Linuxアプリ'
+  [AppGenre.GAME]: 'ゲーム',
+  [AppGenre.TOOL]: 'ツール',
+  [AppGenre.EDUCATION]: '教育',
+  [AppGenre.ENTERTAINMENT]: 'エンタメ',
+  [AppGenre.BUSINESS]: 'ビジネス',
+  [AppGenre.SOCIAL]: 'ソーシャル',
+  [AppGenre.UNSPECIFIED]: '未指定'
 }
 
-// ジャンルごとの色を定義
 export const AppGenreColors: Record<AppGenre, { bg: string; text: string; border: string }> = {
-  [AppGenre.UNSPECIFIED]: {
-    bg: '#F7FAFC',      // 薄いグレー
-    text: '#4A5568',    // グレー
-    border: '#CBD5E0'   // 中間のグレー
-  },
-  [AppGenre.WEB]: {
-    bg: '#EBF8FF',      // 薄い青
-    text: '#2B6CB0',    // 濃い青
-    border: '#90CDF4'   // 中間の青
-  },
-  [AppGenre.IOS]: {
-    bg: '#F0FFF4',      // 薄い緑
-    text: '#276749',    // 濃い緑
-    border: '#9AE6B4'   // 中間の緑
-  },
-  [AppGenre.ANDROID]: {
-    bg: '#FEEBC8',      // 薄いオレンジ
-    text: '#C05621',    // 濃いオレンジ
-    border: '#FBD38D'   // 中間のオレンジ
-  },
-  [AppGenre.WINDOWS]: {
-    bg: '#E9D8FD',      // 薄い紫
-    text: '#553C9A',    // 濃い紫
-    border: '#B794F4'   // 中間の紫
-  },
-  [AppGenre.MAC]: {
-    bg: '#FED7D7',      // 薄い赤
-    text: '#C53030',    // 濃い赤
-    border: '#FC8181'   // 中間の赤
-  },
-  [AppGenre.LINUX]: {
-    bg: '#E2E8F0',      // 薄いグレー
-    text: '#2D3748',    // 濃いグレー
-    border: '#A0AEC0'   // 中間のグレー
-  }
+  [AppGenre.GAME]: { bg: '#FED7D7', text: '#9B2C2C', border: '#FC8181' },
+  [AppGenre.TOOL]: { bg: '#E9D8FD', text: '#553C9A', border: '#B794F4' },
+  [AppGenre.EDUCATION]: { bg: '#C6F6D5', text: '#276749', border: '#68D391' },
+  [AppGenre.ENTERTAINMENT]: { bg: '#FEEBC8', text: '#9C4221', border: '#F6AD55' },
+  [AppGenre.BUSINESS]: { bg: '#BEE3F8', text: '#2C5282', border: '#63B3ED' },
+  [AppGenre.SOCIAL]: { bg: '#FED7E2', text: '#97266D', border: '#F687B3' },
+  [AppGenre.UNSPECIFIED]: { bg: '#E2E8F0', text: '#4A5568', border: '#A0AEC0' }
 } 
