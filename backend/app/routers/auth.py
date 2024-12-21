@@ -226,3 +226,48 @@ async def logout(
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/delete-account")
+async def delete_account(
+    response: Response,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
+):
+    try:
+        print("=== Delete Account Debug ===")
+        print(f"Current user: {current_user}")
+        
+        # ユーザーIDを取得（ObjectIdの文字列形式）
+        user_id = current_user.get("id") or current_user.get("_id")
+        print(f"User ID: {user_id}")
+        
+        if not user_id:
+            raise HTTPException(status_code=400, detail="ユーザーIDが見つかりません")
+
+        # ユーザーのデータを削除
+        from bson import ObjectId
+        result = await db.users.delete_one({"_id": ObjectId(user_id)})
+        print(f"Delete result: {result.deleted_count}")
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="ユーザーが見つかりません")
+
+        # セッションを削除
+        session_id = current_user.get("session_id")
+        if session_id:
+            await redis_client.delete(f"session:{session_id}")
+        
+        # クッキーを削除
+        response.delete_cookie(
+            key="session_id",
+            path="/",
+            secure=True,
+            httponly=True,
+            samesite="lax"
+        )
+        
+        return {"message": "アカウントが正常に削除されました"}
+        
+    except Exception as e:
+        print(f"Error deleting account: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))

@@ -29,6 +29,23 @@ export const useAuthStore = defineStore('auth', {
         console.error('Logout failed:', error)
         throw error
       }
+    },
+    async deleteAccount() {
+      try {
+        await api.delete('/api/auth/delete-account')
+        
+        // ローカルのステートをクリア
+        this.user = null
+        this.isAuthenticated = false
+        
+        // ローカルストレージもクリア
+        localStorage.removeItem('user')
+        localStorage.removeItem('token')  // トークンも削除
+        
+      } catch (error) {
+        console.error('Account deletion failed:', error)
+        throw error
+      }
     }
   }
 }) 

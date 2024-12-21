@@ -22,12 +22,23 @@
           <p class="app-creator">作成者: {{ app.user?.display_name || app.user?.username || '不明なユーザー' }}</p>
         </div>
       </div>
+
+      <div v-if="authStore.isAuthenticated" class="account-actions">
+        <button @click="handleDeleteAccount" class="delete-account-btn">
+          アカウントを完全に削除する
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
+
+const authStore = useAuthStore()
+const router = useRouter()
 
 interface App {
   _id: string
@@ -64,6 +75,17 @@ onMounted(async () => {
     console.error('アプリの取得に失敗しました:', error)
   }
 })
+
+const handleDeleteAccount = async () => {
+  if (confirm('本当にアカウントを削除しますか？\n\n⚠️ この操作は取り消せません。\n- すべての投稿が削除されます\n- アカウント情報が完全に削除されます')) {
+    try {
+      await authStore.deleteAccount()
+      router.push('/')
+    } catch (error) {
+      console.error('Account deletion failed:', error)
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -189,5 +211,38 @@ onMounted(async () => {
 .app-creator::before {
   content: '👤';
   font-size: 1rem;
+}
+
+.account-actions {
+  margin-top: 4rem;
+  padding: 2rem 0;
+  text-align: center;
+  border-top: 1px solid #E2E8F0;
+}
+
+.delete-account-btn {
+  background: none;
+  border: none;
+  color: #A0AEC0;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-account-btn:hover {
+  color: #E53E3E;
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .account-actions {
+    margin-top: 3rem;
+    padding: 1.5rem 0;
+  }
+  
+  .delete-account-btn {
+    font-size: 0.75rem;
+  }
 }
 </style> 
