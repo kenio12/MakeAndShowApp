@@ -8,12 +8,35 @@
 
       <div class="apps-grid">
         <div v-for="app in apps" :key="app._id" class="app-card">
-          <h2 class="app-title">{{ app.name }}</h2>
+          <div class="app-metadata">
+            <div class="app-date">
+              <span class="metadata-label hide-on-mobile">投稿日:</span>
+              {{ formatDate(app.created_at) }}
+            </div>
+            <div 
+              class="app-genre"
+              :style="{
+                backgroundColor: AppGenreColors[app.genre || AppGenre.UNSPECIFIED].bg,
+                color: AppGenreColors[app.genre || AppGenre.UNSPECIFIED].text
+              }"
+            >
+              <span class="metadata-label hide-on-mobile">ジャンル:</span>
+              {{ AppGenreLabels[app.genre || AppGenre.UNSPECIFIED] }}
+            </div>
+          </div>
+          <div 
+            class="card-accent"
+            :style="{ backgroundColor: AppGenreColors[app.genre || AppGenre.UNSPECIFIED].border }"
+          ></div>
+          <h2 class="app-title">
+            <span class="metadata-label hide-on-mobile">アプリ名:</span>
+            {{ app.title }}
+          </h2>
 
           <div v-if="app.screenshots?.length" class="screenshot-container">
             <img
               :src="app.screenshots[0]"
-              :alt="`${app.name}のスクリーンショット`"
+              :alt="`${app.title}のスクリーンショット`"
               class="screenshot"
             />
           </div>
@@ -36,16 +59,18 @@
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
+import { AppGenre, AppGenreLabels, AppGenreColors } from '@/types/app'
 
 const authStore = useAuthStore()
 const router = useRouter()
 
 interface App {
   _id: string
-  name: string
+  title: string
   description: string
+  genre?: AppGenre
   demo_url?: string
-  source_url?: string
+  github_url?: string
   screenshots: string[]
   created_at: string
   user?: {
@@ -69,8 +94,12 @@ onMounted(async () => {
       throw new Error('アプリの取得に失敗しました')
     }
     
-    apps.value = await response.json()
-    console.log('取得したアプリ:', apps.value)  // デバッグ用
+    const data = await response.json()
+    // 新着順（降順）に並び替え
+    apps.value = data.sort((a: App, b: App) => {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+    console.log('取得したアプリ:', apps.value)
   } catch (error) {
     console.error('アプリの取得に失敗しました:', error)
   }
@@ -85,6 +114,16 @@ const handleDeleteAccount = async () => {
       console.error('Account deletion failed:', error)
     }
   }
+}
+
+// 付フォーマット用の関数を追加
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('ja-JP', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
 }
 </script>
 
@@ -141,14 +180,7 @@ const handleDeleteAccount = async () => {
 }
 
 .app-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: #3182CE;
-  border-radius: 4px 0 0 4px;
+  content: none;
 }
 
 .app-card:hover {
@@ -158,11 +190,17 @@ const handleDeleteAccount = async () => {
 }
 
 .app-title {
+  margin-top: 3rem;
   font-size: 1.3rem;
-  font-weight: bold;
-  margin-bottom: 0.75rem;
   color: #2D3748;
   padding-left: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-title .metadata-label {
+  font-size: 1rem;
 }
 
 .screenshot-container {
@@ -246,5 +284,64 @@ const handleDeleteAccount = async () => {
   .delete-account-btn {
     font-size: 0.75rem;
   }
+
+  .hide-on-mobile {
+    display: none;
+  }
+
+  .app-metadata {
+    gap: 0.5rem;  /* モバイルでのメタデータ間の間隔を調整 */
+  }
+
+  .app-date, .app-genre {
+    font-size: 0.75rem;  /* モバイルでは少し小さめに */
+    padding: 0.2rem 0.4rem;  /* パディングも少し小さく */
+  }
+
+  .app-title {
+    margin-top: 2.5rem;  /* モバイルではマージンを少し小さく */
+    font-size: 1.2rem;
+  }
+}
+
+.app-metadata {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  top: 0.75rem;
+  left: 1.5rem;
+  right: 1.5rem;
+}
+
+.metadata-label {
+  font-weight: 600;
+  margin-right: 0.25rem;
+}
+
+.app-date {
+  font-size: 0.8rem;
+  color: #718096;
+  background-color: #F7FAFC;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.app-genre {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  font-weight: normal;  /* labelの部分だけ太字にするため、ここは通常に */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.card-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  border-radius: 4px 0 0 4px;
 }
 </style> 
