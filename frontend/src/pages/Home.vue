@@ -9,10 +9,10 @@
       <div class="apps-grid">
         <div v-for="app in apps" :key="app._id" class="app-card">
           <div class="app-metadata">
-            <div class="app-date">
-              <span class="metadata-label hide-on-mobile">投稿日:</span>
-              {{ formatDate(app.created_at) }}
-            </div>
+            <h3 class="app-title">
+              <span class="metadata-label hide-on-mobile">アプリ名：</span>
+              {{ app.title }}
+            </h3>
             <div 
               class="app-genre"
               :style="{
@@ -24,14 +24,11 @@
               {{ AppGenreLabels[app.genre || AppGenre.UNSPECIFIED] }}
             </div>
           </div>
+
           <div 
             class="card-accent"
             :style="{ backgroundColor: AppGenreColors[app.genre || AppGenre.UNSPECIFIED].border }"
           ></div>
-          <h2 class="app-title">
-            <span class="metadata-label hide-on-mobile">アプリ名:</span>
-            {{ app.title }}
-          </h2>
 
           <div v-if="app.screenshots?.length" class="screenshot-container">
             <img
@@ -41,8 +38,13 @@
             />
           </div>
 
-          <p class="app-description">{{ app.description }}</p>
-          <p class="app-creator">作成者: {{ app.user?.display_name || app.user?.username || '不明なユーザー' }}</p>
+          <div class="app-footer">
+            <p class="app-creator">作成者: {{ app.user?.display_name || app.user?.username || '不明なユーザー' }}</p>
+            <div class="app-date">
+              <span class="metadata-label hide-on-mobile">投稿日:</span>
+              {{ formatDate(app.created_at) }}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -95,7 +97,7 @@ onMounted(async () => {
     }
     
     const data = await response.json()
-    // 新着順（降順）に並び替え
+    // 新着順（降順）に並び替
     apps.value = data.sort((a: App, b: App) => {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
@@ -189,22 +191,9 @@ const formatDate = (dateString: string) => {
   border-color: #CBD5E0;
 }
 
-.app-title {
-  margin-top: 3rem;
-  font-size: 1.3rem;
-  color: #2D3748;
-  padding-left: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.app-title .metadata-label {
-  font-size: 1rem;
-}
-
 .screenshot-container {
-  margin: 1rem 0;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
   border-radius: 0.5rem;
   overflow: hidden;
   position: relative;
@@ -229,26 +218,34 @@ const formatDate = (dateString: string) => {
   transform: scale(1.02);
 }
 
-.app-description {
-  color: #4A5568;
-  margin: 0.75rem 0;
-  line-height: 1.5;
-  padding-left: 0.75rem;
+.app-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.app-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2D3748;
+  margin: 0;
 }
 
 .app-creator {
   font-size: 0.875rem;
   color: #718096;
-  padding-left: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  margin: 0;
 }
 
-.app-creator::before {
-  content: '👤';
-  font-size: 1rem;
+.app-date {
+  font-size: 0.8rem;
+  color: #718096;
+  background-color: #F7FAFC;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .account-actions {
@@ -289,18 +286,14 @@ const formatDate = (dateString: string) => {
     display: none;
   }
 
-  .app-metadata {
-    gap: 0.5rem;  /* モバイルでのメタデータ間の間隔を調整 */
+  .app-metadata, .app-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
-
-  .app-date, .app-genre {
-    font-size: 0.75rem;  /* モバイルでは少し小さめに */
-    padding: 0.2rem 0.4rem;  /* パディングも少し小さく */
-  }
-
+  
   .app-title {
-    margin-top: 2.5rem;  /* モバイルではマージンを少し小さく */
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
 }
 
@@ -308,32 +301,14 @@ const formatDate = (dateString: string) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: absolute;
-  top: 0.75rem;
-  left: 1.5rem;
-  right: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  position: relative;
 }
 
 .metadata-label {
   font-weight: 600;
   margin-right: 0.25rem;
-}
-
-.app-date {
-  font-size: 0.8rem;
   color: #718096;
-  background-color: #F7FAFC;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.app-genre {
-  font-size: 0.8rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.25rem;
-  font-weight: normal;  /* labelの部分だけ太字にするため、ここは通常に */
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .card-accent {
