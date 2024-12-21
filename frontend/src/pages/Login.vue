@@ -65,17 +65,33 @@ const formData = ref({
 const handleSubmit = async () => {
   try {
     isLoading.value = true
-    console.log('ログイン試行:', { email: formData.value.email })  // デバッグ用
-
-    await authStore.login({
-      email: formData.value.email,
-      password: formData.value.password
-    })
     
-    console.log('ログイン成功')  // デバッグ用
-    router.push('/')  // ログイン成功後はホームページへ
+    // FormDataオブジェクトを作成
+    const formDataObj = new FormData()
+    formDataObj.append('username', formData.value.email)  // emailをusernameとして送信
+    formDataObj.append('password', formData.value.password)
+
+    // APIリクエストを直接送信
+    const response = await fetch('http://localhost:8000/api/auth/login', {
+      method: 'POST',
+      body: formDataObj,
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.detail || 'ログインに失敗しました')
+    }
+
+    // 成功時の処理
+    authStore.updateUser(data.user)
+    authStore.updateAuthenticated(true)
+    localStorage.setItem('token', data.access_token)
+    
+    console.log('ログイン成功')
+    router.push('/')
   } catch (error) {
-    console.error('ログインエラー:', error)  // デバッグ用
+    console.error('ログインエラー:', error)
     alert(error instanceof Error ? error.message : 'ログインに失敗しました')
   } finally {
     isLoading.value = false

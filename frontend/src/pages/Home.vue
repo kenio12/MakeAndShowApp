@@ -19,7 +19,7 @@
           </div>
 
           <p class="app-description">{{ app.description }}</p>
-          <p class="app-creator">作成者: {{ app.user_id }}</p>
+          <p class="app-creator">作成者: {{ app.user?.display_name || app.user?.username || '不明なユーザー' }}</p>
         </div>
       </div>
     </div>
@@ -38,6 +38,10 @@ interface App {
   screenshots: string[]
   created_at: string
   user_id: string
+  user?: {
+    display_name?: string
+    username: string
+  }
 }
 
 const apps = ref<App[]>([])
