@@ -25,7 +25,7 @@
 
       <div v-if="authStore.isAuthenticated" class="account-actions">
         <button @click="handleDeleteAccount" class="delete-account-btn">
-          アカウントを完全に削除する
+          退会する
         </button>
       </div>
     </div>
@@ -216,29 +216,31 @@ const handleDeleteAccount = async () => {
 .account-actions {
   margin-top: 4rem;
   padding: 2rem 0;
-  text-align: center;
+  text-align: right;
   border-top: 1px solid #E2E8F0;
 }
 
 .delete-account-btn {
   background: none;
   border: none;
-  color: #A0AEC0;
-  font-size: 0.875rem;
+  color: #718096;
+  font-size: 0.8rem;
   padding: 0.5rem 1rem;
   cursor: pointer;
   transition: all 0.2s;
+  opacity: 0.85;
 }
 
 .delete-account-btn:hover {
   color: #E53E3E;
   text-decoration: underline;
+  opacity: 1;
 }
 
 @media (max-width: 640px) {
   .account-actions {
     margin-top: 3rem;
-    padding: 1.5rem 0;
+    padding: 1.5rem 0.5rem;
   }
   
   .delete-account-btn {

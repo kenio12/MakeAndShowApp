@@ -5,38 +5,36 @@
         <span class="brand-text">
           <span class="brand-full-text">俺のアプリ</span>
           <button class="mobile-brand-btn">
-            <span class="mobile-brand-text">俺</span>
+            <span class="mobile-brand-text">ア</span>
           </button>
         </span>
       </router-link>
 
       <div class="nav-buttons">
-        <!-- 投稿ボタン（常に表示） -->
         <router-link to="/post-app">
           <button class="btn btn-primary">
             <span class="btn-text">アプリを投稿</span>
-            <span class="btn-icon">⚡</span>
+            <span class="mobile-text">投</span>
           </button>
         </router-link>
 
-        <!-- 認証関連のボタン -->
         <template v-if="authStore.isAuthenticated">
           <button @click="handleLogout" class="btn btn-red">
             <span class="btn-text">ログアウト</span>
-            <span class="btn-icon">🚪</span>
+            <span class="mobile-text">出</span>
           </button>
         </template>
         <template v-else>
           <router-link to="/login">
             <button class="btn btn-blue">
               <span class="btn-text">ログイン</span>
-              <span class="btn-icon">🔑</span>
+              <span class="mobile-text">入</span>
             </button>
           </router-link>
           <router-link to="/signup">
             <button class="btn btn-green">
               <span class="btn-text">新規登録</span>
-              <span class="btn-icon">✨</span>
+              <span class="mobile-text">新</span>
             </button>
           </router-link>
         </template>
@@ -295,6 +293,24 @@ const handleLogout = async () => {
 
   .brand-icon {
     font-size: 1.2rem;
+  }
+}
+
+.mobile-text {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .btn-text {
+    display: none;
+  }
+
+  .mobile-text {
+    display: block;
+  }
+
+  .btn-icon {
+    display: none;
   }
 }
 </style> 

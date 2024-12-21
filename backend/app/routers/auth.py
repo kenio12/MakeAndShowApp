@@ -271,3 +271,13 @@ async def delete_account(
     except Exception as e:
         print(f"Error deleting account: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/verify-session")
+async def verify_session(current_user: dict = Depends(get_current_user)):
+    try:
+        return {
+            "message": "Session is valid",
+            "user": current_user
+        }
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid session")
