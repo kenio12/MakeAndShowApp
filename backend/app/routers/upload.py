@@ -20,30 +20,36 @@ async def upload_screenshots(files: List[UploadFile] = File(...)):
     """
     複数の画像をアップロードするエンドポイント
     """
-    uploaded_urls = []
-    
-    for file in files:
-        # ファイル形式チェック
-        if not file.content_type.startswith('image/'):
-            raise HTTPException(status_code=400, detail="画像ファイルのみアップロード可能です")
+    try:
+        uploaded_urls = []
         
-        try:
-            # ファイルの内容を読み込む
-            contents = await file.read()
+        for file in files:
+            if not file.content_type.startswith('image/'):
+                raise HTTPException(status_code=400, detail="画像ファイルのみアップロード可能です")
             
-            # Cloudinaryにアップロード
-            # ユニークなファイル名を生成
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            result = cloudinary.uploader.upload(
-                contents,
-                folder="makeandshowapp",  # Cloudinary上のフォルダ
-                public_id=f"{timestamp}_{file.filename}"  # ファイル名
-            )
-            
-            # セキュアなURLを取得
-            uploaded_urls.append(result["secure_url"])
-            
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"アップロード中にエラーが発生しました: {str(e)}")
-    
-    return uploaded_urls
+            try:
+                contents = await file.read()
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                
+                # デバッグ用のログ
+                print(f"Uploading file: {file.filename}")
+                print(f"Content type: {file.content_type}")
+                print(f"File size: {len(contents)} bytes")
+                
+                result = cloudinary.uploader.upload(
+                    contents,
+                    folder="makeandshowapp",
+                    public_id=f"{timestamp}_{file.filename}"
+                )
+                
+                uploaded_urls.append(result["secure_url"])
+                
+            except Exception as e:
+                print(f"Error uploading file {file.filename}: {str(e)}")
+                raise HTTPException(status_code=500, detail=f"ファイル {file.filename} のアップロード中にエラーが発生: {str(e)}")
+        
+        return uploaded_urls
+        
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"予期せぬエラーが発生: {str(e)}")

@@ -19,7 +19,7 @@ async def get_mongodb_client():
 # データベースとコレクションの取得
 async def get_db():
     client = await get_mongodb_client()
-    return client.devshare_db
+    return client.ore_app_db
 
 # 必要に応じてコレクション（テーブルみたいなもの）を取得する関数も用意
 async def get_collection(collection_name: str):

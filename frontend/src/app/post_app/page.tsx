@@ -109,12 +109,12 @@ export default function PostAppPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
+          title: formData.name,
           prefix_icon: formData.prefix_icon,
           suffix_icon: formData.suffix_icon,
           description: formData.description,
           demo_url: formData.demoUrl || null,
-          source_url: formData.sourceUrl || null,
+          github_url: formData.sourceUrl || null,
           user_id: "development_user_001",
           screenshots: uploadedUrls
         })
@@ -191,6 +191,8 @@ export default function PostAppPage() {
           </Heading>
 
           <Box 
+            as="form"
+            onSubmit={handleSubmit}
             w="full" 
             maxW="800px" 
             p={8} 
