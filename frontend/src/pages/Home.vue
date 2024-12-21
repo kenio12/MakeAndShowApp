@@ -37,10 +37,10 @@ interface App {
   source_url?: string
   screenshots: string[]
   created_at: string
-  user_id: string
   user?: {
-    display_name?: string
+    _id: string
     username: string
+    display_name?: string
   }
 }
 
@@ -48,8 +48,18 @@ const apps = ref<App[]>([])
 
 onMounted(async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/apps/')
+    const response = await fetch('http://localhost:8000/api/apps/', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    
+    if (!response.ok) {
+      throw new Error('アプリの取得に失敗しました')
+    }
+    
     apps.value = await response.json()
+    console.log('取得したアプリ:', apps.value)  // デバッグ用
   } catch (error) {
     console.error('アプリの取得に失敗しました:', error)
   }

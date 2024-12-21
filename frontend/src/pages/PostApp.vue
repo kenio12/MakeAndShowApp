@@ -169,6 +169,9 @@ const handleSubmit = async () => {
 
     const uploadResponse = await fetch('http://localhost:8000/api/upload/screenshots', {
       method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
       body: imageFormData
     })
 
@@ -179,21 +182,25 @@ const handleSubmit = async () => {
     const uploadedUrls = await uploadResponse.json()
 
     // アプリデータを送信
+    const postData = {
+      title: formData.value.name,
+      description: formData.value.description,
+      demo_url: formData.value.demoUrl || null,
+      github_url: formData.value.sourceUrl || null,
+      screenshots: uploadedUrls,
+      prefix_icon: formData.value.prefix_icon,
+      suffix_icon: formData.value.suffix_icon
+    }
+
+    console.log('送信するデータ:', postData)
+
     const response = await fetch('http://localhost:8000/api/apps/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       },
-      body: JSON.stringify({
-        title: formData.value.name,
-        prefix_icon: formData.value.prefix_icon,
-        suffix_icon: formData.value.suffix_icon,
-        description: formData.value.description,
-        demo_url: formData.value.demoUrl || null,
-        github_url: formData.value.sourceUrl || null,
-        user_id: "development_user_001", // TODO: 認証実装後に実際のユーザーIDを使用
-        screenshots: uploadedUrls
-      })
+      body: JSON.stringify(postData)
     })
 
     if (!response.ok) {
@@ -203,7 +210,8 @@ const handleSubmit = async () => {
     alert('投稿が完了しました！')
     router.push('/')
   } catch (error) {
-    alert(error instanceof Error ? error.message : '予期せぬエラーが発生しました')
+    console.error('投稿エラー:', error)
+    alert(error instanceof Error ? error.message : 'アプリの投稿に失敗しました')
   } finally {
     isSubmitting.value = false
   }

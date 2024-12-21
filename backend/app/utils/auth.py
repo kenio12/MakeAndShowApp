@@ -2,6 +2,10 @@ from datetime import datetime, timedelta, UTC
 from jose import jwt
 from passlib.context import CryptContext
 from app.core.config import settings
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from ..database import get_db
+from bson import ObjectId
 
 # パスワードハッシュ化のための設定
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -29,4 +33,40 @@ def create_verification_token(email: str) -> str:
         "exp": expire,
         "type": "email_verification"
     }
-    return jwt.encode(data, settings.SECRET_KEY, algorithm=settings.ALGORITHM) 
+    return jwt.encode(data, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
+
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    db = Depends(get_db)
+):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="認証に失敗しました",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    try:
+        # トークンを検証
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM]
+        )
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+        
+        # ユーザーをデータベースから取得
+        user = await db["users"].find_one({"email": email})
+        if user is None:
+            raise credentials_exception
+            
+        # ObjectIdを文字列に変換
+        user["_id"] = str(user["_id"])
+        
+        return user
+        
+    except JWTError:
+        raise credentials_exception 
