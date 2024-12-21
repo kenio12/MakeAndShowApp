@@ -53,7 +53,7 @@ async def register(user: UserCreate, response: Response, db: AsyncIOMotorDatabas
         # 確認トークンを生成
         verification_token = create_verification_token(user.email)
         
-        # 新規ユーザーの作成（is_activeとis_verifiedをFalseに設定）
+        # 新規ユーザーの作成
         user_dict = {
             "email": user.email,
             "username": user.username,
@@ -69,7 +69,18 @@ async def register(user: UserCreate, response: Response, db: AsyncIOMotorDatabas
         created_user["_id"] = str(created_user["_id"])
         
         # 確認メールの送信
-        await send_verification_email(user.email, user.username, verification_token)
+        print(f"Sending verification email for user: {user.email}")
+        try:
+            await send_verification_email(user.email, user.username, verification_token)
+            print("Verification email sent successfully")
+        except Exception as e:
+            print(f"Error sending verification email: {str(e)}")
+            # メール送信に失敗した場合、作成したユーザーを削除
+            await db.users.delete_one({"_id": result.inserted_id})
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to send verification email"
+            )
         
         # セッションは作成しない（メール確認後にログインさせる）
         return {
@@ -122,30 +133,67 @@ async def login(
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/verify-email/{token}")
-async def verify_email(token: str, db: AsyncIOMotorDatabase = Depends(get_db)):
-    # トークンの検証
+async def verify_email(token: str, response: Response, db: AsyncIOMotorDatabase = Depends(get_db)):
     try:
+        # トークンの検証
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email = payload.get("sub")
+        
+        # ユーザーの更新とログイン情報の取得
+        user = await db.users.find_one_and_update(
+            {"email": email},
+            {
+                "$set": {
+                    "is_active": True,
+                    "is_verified": True,
+                    "last_login": datetime.utcnow()  # ログイン時刻を更新
+                }
+            },
+            return_document=True
+        )
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User not found"
+            )
+        
+        # セッションを作成
+        session_id = await create_session(str(user["_id"]))
+        
+        # Cookieを設定
+        response.set_cookie(
+            key="session_id",
+            value=session_id,
+            httponly=True,
+            max_age=1800,
+            samesite="lax"
+        )
+        
+        # JWTトークンを生成
+        access_token = create_access_token(data={"sub": email})
+        
+        # ユーザー情報を整形
+        user_response = {
+            "id": str(user["_id"]),
+            "email": user["email"],
+            "username": user["username"],
+            "is_active": user["is_active"],
+            "is_verified": user["is_verified"]
+        }
+        
+        return {
+            "message": "Email verified successfully",
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": user_response
+        }
+        
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired verification token"
         )
-    
-    # ユーザーの更新
-    result = await db.users.update_one(
-        {"email": email},
-        {"$set": {"is_active": True, "is_verified": True}}
-    )
-    
-    if result.modified_count == 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User not found"
-        )
-    
-    return {"message": "Email verified successfully"}
 
 @router.post("/forgot-password")
 async def forgot_password(email: str, db: AsyncIOMotorDatabase = Depends(get_db)):

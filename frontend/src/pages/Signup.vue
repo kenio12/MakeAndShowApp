@@ -85,13 +85,9 @@ const passwordMismatch = computed(() => {
 })
 
 const handleSubmit = async () => {
-  if (passwordMismatch.value) {
-    alert('パスワードが一致しません')
-    return
-  }
-
   try {
     isLoading.value = true
+    
     const response = await fetch('http://localhost:8000/api/auth/register', {
       method: 'POST',
       headers: {
@@ -109,7 +105,7 @@ const handleSubmit = async () => {
 
     alert('サインアップが完了しました！メールを確認して、アカウントを有効化してください。')
     
-    router.push('/login')
+    router.push('/')
     
   } catch (error) {
     alert(error instanceof Error ? error.message : '予期せぬエラーが発生しました')
