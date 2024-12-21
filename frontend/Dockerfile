@@ -4,7 +4,7 @@ WORKDIR /app
 # package.jsonとpackage-lock.jsonをコピー
 COPY package*.json ./
 
-# 依存関係のインストール
+# 依存関係のインストール（axiosは既にpackage.jsonに含まれている）
 RUN npm install
 
 # ソースコードをコピー

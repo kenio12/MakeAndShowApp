@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from app.database import get_db
@@ -10,11 +10,10 @@ from jose import jwt
 from jose import JWTError
 from app.config import settings
 from datetime import datetime
-from fastapi.responses import Response
-import bcrypt
-import uuid
-from ..redis_client import redis_client
 from fastapi.responses import JSONResponse
+from ..utils.auth import get_current_user
+from typing import Optional
+from ..redis_client import redis_client
 
 router = APIRouter(tags=["auth"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
@@ -203,3 +202,27 @@ async def forgot_password(email: str, db: AsyncIOMotorDatabase = Depends(get_db)
         # パスワードリセットメールを送信
         await send_password_reset_email(user["email"])
     return {"message": "If an account exists, a password reset link has been sent"}
+
+@router.post("/logout")
+async def logout(
+    response: Response,
+    session_id: Optional[str] = Cookie(None)
+):
+    try:
+        # セッションIDがあればRedisから削除
+        if session_id:
+            await redis_client.delete(f"session:{session_id}")
+        
+        # クッキーを削除
+        response.delete_cookie(
+            key="session_id",
+            path="/",
+            secure=True,
+            httponly=True,
+            samesite="lax"
+        )
+        
+        return {"message": "ログアウトに成功しました"}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
