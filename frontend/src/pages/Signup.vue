@@ -34,6 +34,19 @@
           />
         </div>
 
+        <div class="form-control">
+          <label class="form-label">パスワード（確認用）</label>
+          <input
+            v-model="formData.passwordConfirm"
+            type="password"
+            class="form-input"
+            required
+          />
+          <span v-if="passwordMismatch" class="error-text">
+            パスワードが一致しません
+          </span>
+        </div>
+
         <div class="button-group">
           <button
             type="submit"
@@ -52,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 
@@ -63,21 +76,33 @@ const isLoading = ref(false)
 const formData = ref({
   email: '',
   username: '',
-  password: ''
+  password: '',
+  passwordConfirm: ''
+})
+
+const passwordMismatch = computed(() => {
+  return formData.value.password !== formData.value.passwordConfirm
 })
 
 const handleSubmit = async () => {
+  if (passwordMismatch.value) {
+    alert('パスワードが一致しません')
+    return
+  }
+
   try {
     isLoading.value = true
-    await authStore.register({
+    const result = await authStore.register({
       email: formData.value.email,
       username: formData.value.username,
       password: formData.value.password
     })
     
+    console.log('Registration successful:', result)  // デバッグ用
     alert('確認メールを送信しました。メールを確認して登録を完了してください。')
     router.push('/login')
   } catch (error) {
+    console.error('Registration error:', error)  // デバッグ用
     alert(error instanceof Error ? error.message : '予期せぬエラーが発生しました')
   } finally {
     isLoading.value = false
@@ -130,5 +155,11 @@ const handleSubmit = async () => {
 .btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+.error-text {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
 </style> 

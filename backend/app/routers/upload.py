@@ -7,13 +7,25 @@ from datetime import datetime
 
 router = APIRouter()
 
+# デバッグ用のログを追加
+print("=== Cloudinary Config Debug ===")
+print(f"Cloud Name: {settings.CLOUDINARY_CLOUD_NAME}")
+print(f"API Key: {settings.CLOUDINARY_API_KEY}")
+print(f"API Secret: {settings.CLOUDINARY_API_SECRET}")
+print("===========================")
+
 # Cloudinaryの設定
-cloudinary.config(
-    cloud_name=settings.CLOUDINARY_CLOUD_NAME,
-    api_key=settings.CLOUDINARY_API_KEY,
-    api_secret=settings.CLOUDINARY_API_SECRET,
-    secure=True
-)
+try:
+    cloudinary.config(
+        cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+        api_key=settings.CLOUDINARY_API_KEY,
+        api_secret=settings.CLOUDINARY_API_SECRET,
+        secure=True
+    )
+    print("Cloudinary configuration successful!")
+except Exception as e:
+    print(f"Cloudinary configuration error: {str(e)}")
+    raise
 
 @router.post("/api/upload/screenshots", response_model=List[str])
 async def upload_screenshots(files: List[UploadFile] = File(...)):

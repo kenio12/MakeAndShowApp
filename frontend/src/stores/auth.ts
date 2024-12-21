@@ -24,29 +24,33 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(credentials: LoginCredentials) {
     try {
+      const formData = new FormData();
+      formData.append('username', credentials.email);
+      formData.append('password', credentials.password);
+
       const response = await fetch('http://localhost:8000/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
+        body: formData,
       })
 
       if (!response.ok) {
-        throw new Error('ログインに失敗しました')
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'ログインに失敗しました');
       }
 
-      const data = await response.json()
-      user.value = data.user
-      isAuthenticated.value = true
+      const data = await response.json();
+      user.value = data.user;
+      isAuthenticated.value = true;
       
-      localStorage.setItem('token', data.token)
-      localStorage.setItem('user', JSON.stringify(data.user))
+      localStorage.setItem('token', data.access_token);
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
       
-      return data
+      return data;
     } catch (error) {
-      console.error('ログインエラー:', error)
-      throw error
+      console.error('ログインエラー:', error);
+      throw error;
     }
   }
 
@@ -57,14 +61,18 @@ export const useAuthStore = defineStore('auth', () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(data),
       })
 
       if (!response.ok) {
-        throw new Error('登録に失敗しました')
+        const errorData = await response.json()
+        throw new Error(errorData.detail || '登録に失敗しました')
       }
 
-      return await response.json()
+      const result = await response.json()
+      console.log('Registration response:', result)
+      return result
     } catch (error) {
       console.error('登録エラー:', error)
       throw error

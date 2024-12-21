@@ -6,7 +6,7 @@ from datetime import datetime
 from bson import ObjectId
 import json
 
-router = APIRouter()
+router = APIRouter(prefix="/api")
 
 # ObjectIdをJSON形式に変換するためのヘルパー関数
 def serialize_object_id(obj):
@@ -44,7 +44,7 @@ async def get_apps(skip: int = 0, limit: int = 10, db = Depends(get_db)):
             "_id": str(app["_id"]),
             "name": app.get("name", ""),
             "description": app.get("description", ""),
-            "prefix_icon": app.get("prefix_icon", "🗡️"),
+            "prefix_icon": app.get("prefix_icon", "🗡��"),
             "suffix_icon": app.get("suffix_icon", "🏴‍☠️"),
             "demo_url": app.get("demo_url"),
             "source_url": app.get("source_url"),

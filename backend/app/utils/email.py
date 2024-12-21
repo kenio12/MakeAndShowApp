@@ -1,39 +1,27 @@
-import emails
-from app.config import settings
+from fastapi_mail import FastMail, MessageSchema, MessageType
+from app.core.config import MAIL_CONFIG
+from pathlib import Path
 
-def send_email(
-    email_to: str,
-    subject: str,
-    html_content: str
-) -> bool:
-    message = emails.Message(
-        subject=subject,
-        html=html_content,
-        mail_from=(settings.MAIL_FROM_NAME, settings.MAIL_FROM)
-    )
-    
-    response = message.send(
-        to=email_to,
-        smtp={
-            "host": settings.MAIL_SERVER,
-            "port": settings.MAIL_PORT,
-            "user": settings.MAIL_USERNAME,
-            "password": settings.MAIL_PASSWORD,
-            "tls": True,
-        }
-    )
-    
-    return response.status_code == 250
+fastmail = FastMail(MAIL_CONFIG)
 
-def send_verification_email(email_to: str, token: str) -> bool:
-    subject = "メールアドレスの確認"
-    verification_url = f"http://localhost:3000/verify-email?token={token}"
+async def send_verification_email(email: str, username: str, token: str):
+    # メールの本文を作成
+    verify_url = f"http://localhost:5173/verify-email?token={token}"
     
-    html_content = f"""
-    <p>DevShareへようこそ！</p>
-    <p>以下のリンクをクリックして、メールアドレスを確認してください：</p>
-    <p><a href="{verification_url}">メールアドレスを確認する</a></p>
-    <p>このリンクは30分間有効です。</p>
+    html = f"""
+    <p>こんにちは {username} さん</p>
+    <p>以下のリンクをクリックしてメールアドレスを確認してください：</p>
+    <p><a href="{verify_url}">メールアドレスを確認する</a></p>
+    <p>このリンクは24時間有効です。</p>
     """
-    
-    return send_email(email_to, subject, html_content) 
+
+    # メール設定
+    message = MessageSchema(
+        subject="メールアドレスの確認",
+        recipients=[email],
+        body=html,
+        subtype=MessageType.html
+    )
+
+    # メール送信
+    await fastmail.send_message(message) 

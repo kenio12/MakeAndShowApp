@@ -4,7 +4,7 @@ from typing import Optional, List
 from bson import ObjectId
 
 class App(BaseModel):
-    id: str = Field(default_factory=lambda: str(ObjectId()), alias="_id")
+    id: str = Field(alias="_id")
     title: str
     description: str
     github_url: str | None = None

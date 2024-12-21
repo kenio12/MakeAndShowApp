@@ -11,6 +11,7 @@
             type="email"
             class="form-input"
             required
+            placeholder="example@email.com"
           />
         </div>
 
@@ -21,6 +22,7 @@
             type="password"
             class="form-input"
             required
+            placeholder="パスワードを入力"
           />
         </div>
 
@@ -63,13 +65,17 @@ const formData = ref({
 const handleSubmit = async () => {
   try {
     isLoading.value = true
+    console.log('ログイン試行:', { email: formData.value.email })  // デバッグ用
+
     await authStore.login({
       email: formData.value.email,
       password: formData.value.password
     })
     
+    console.log('ログイン成功')  // デバッグ用
     router.push('/')  // ログイン成功後はホームページへ
   } catch (error) {
+    console.error('ログインエラー:', error)  // デバッグ用
     alert(error instanceof Error ? error.message : 'ログインに失敗しました')
   } finally {
     isLoading.value = false
