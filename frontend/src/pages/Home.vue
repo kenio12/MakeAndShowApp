@@ -2,8 +2,8 @@
   <div class="home-container">
     <div class="container">
       <div class="header">
-        <h1 class="title">🏴‍☠️ 俺のアプリ 💀</h1>
-        <p class="subtitle">作ったアプリを見せてやる！</p>
+        <h1 class="title">🗡️ 俺のアプリ 🏴‍☠️</h1>
+        <p class="subtitle">アプリ王になる！</p>
       </div>
 
       <div class="apps-grid">
@@ -56,7 +56,7 @@ onMounted(async () => {
 .home-container {
   background-color: #EBF8FF;
   min-height: 100vh;
-  padding: 2.5rem 0;
+  padding: 1.5rem 0;
 }
 
 .container {
@@ -67,13 +67,16 @@ onMounted(async () => {
 
 .header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
 }
 
 .title {
   font-size: 2.5rem;
   font-weight: bold;
-  margin-bottom: 1rem;
+  color: #2D3748;
+  margin-bottom: 0.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .subtitle {
@@ -85,53 +88,92 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  padding: 0.5rem 1rem;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .app-card {
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  border-radius: 0.75rem;
   background: white;
-  transition: transform 0.3s;
+  transition: all 0.3s ease;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.app-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: #3182CE;
+  border-radius: 4px 0 0 4px;
 }
 
 .app-card:hover {
   transform: translateY(-4px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+  border-color: #CBD5E0;
 }
 
 .app-title {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: bold;
   margin-bottom: 0.75rem;
+  color: #2D3748;
+  padding-left: 0.75rem;
 }
 
 .screenshot-container {
-  margin-bottom: 1rem;
-  border-radius: 0.375rem;
+  margin: 1rem 0;
+  border-radius: 0.5rem;
   overflow: hidden;
   position: relative;
   width: 100%;
-  max-height: 500px;
+  background: #F7FAFC;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .screenshot {
-  width: auto;
+  width: 100%;
   height: auto;
-  max-width: 100%;
-  max-height: 500px;
-  margin: auto;
-  display: block;
   object-fit: contain;
-  background-color: #F7FAFC;
+  max-width: 100%;
+  max-height: 400px;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.screenshot:hover {
+  transform: scale(1.02);
 }
 
 .app-description {
   color: #4A5568;
-  margin-bottom: 1rem;
+  margin: 0.75rem 0;
+  line-height: 1.5;
+  padding-left: 0.75rem;
 }
 
 .app-creator {
   font-size: 0.875rem;
   color: #718096;
+  padding-left: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.app-creator::before {
+  content: '👤';
+  font-size: 1rem;
 }
 </style> 

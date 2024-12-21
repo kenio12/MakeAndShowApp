@@ -19,8 +19,8 @@ interface RegisterData {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null)
-  const isAuthenticated = ref(false)
+  const user = ref<User | null>(JSON.parse(localStorage.getItem('user') || 'null'))
+  const isAuthenticated = ref(!!localStorage.getItem('token'))
 
   async function login(credentials: LoginCredentials) {
     try {
@@ -39,6 +39,9 @@ export const useAuthStore = defineStore('auth', () => {
       const data = await response.json()
       user.value = data.user
       isAuthenticated.value = true
+      
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('user', JSON.stringify(data.user))
       
       return data
     } catch (error) {
@@ -71,6 +74,8 @@ export const useAuthStore = defineStore('auth', () => {
   function logout() {
     user.value = null
     isAuthenticated.value = false
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
   }
 
   return {
